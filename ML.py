@@ -54,16 +54,16 @@ class AdvancedHousePricePredictor:
             for filename in possible_files:
                 try:
                     self.df = pd.read_csv(filename)
-                    print(f"✅ Loaded: {filename}")
+                    print(f" Loaded: {filename}")
                     break
                 except:
                     continue
         else:
             self.df = pd.read_csv(filepath)
-            print(f"✅ Loaded: {filepath}")
+            print(f" Loaded: {filepath}")
 
         if self.df is None:
-            print("⚠️  No dataset found. Generating synthetic data...")
+            print("  No dataset found. Generating synthetic data...")
             self.df = self._generate_data()
 
         # Detect target column
@@ -149,7 +149,7 @@ class AdvancedHousePricePredictor:
             if self.df[col].isnull().any():
                 self.df[col].fillna(self.df[col].mode()[0] if len(self.df[col].mode()) > 0 else 'Unknown', inplace=True)
 
-        print("✅ Data cleaned")
+        print(" Data cleaned")
 
     def create_market_segments(self, n_segments=3):
         """
@@ -160,7 +160,7 @@ class AdvancedHousePricePredictor:
         print("-" * 80)
 
         if self.target_col not in self.df.columns:
-            print("⚠️  Target column not found, skipping segmentation")
+            print("  Target column not found, skipping segmentation")
             return
 
         segment_features = [self.target_col]
@@ -203,7 +203,7 @@ class AdvancedHousePricePredictor:
             self.label_encoders[col] = LabelEncoder()
             df_encoded[col] = self.label_encoders[col].fit_transform(df_encoded[col])
 
-        print(f"✅ Encoded {len(categorical)} categorical features")
+        print(f" Encoded {len(categorical)} categorical features")
 
         exclude_cols = [self.target_col]
 
@@ -218,7 +218,7 @@ class AdvancedHousePricePredictor:
         y_price = df_encoded[self.target_col]
         y_tax = df_encoded['PropertyTax'] if has_tax else None
 
-        print(f"✅ Prepared {X.shape[1]} features")
+        print(f" Prepared {X.shape[1]} features")
 
         return X, y_price, y_tax
 
@@ -238,7 +238,7 @@ class AdvancedHousePricePredictor:
             n_jobs=-1
         )
         self.models['rf'].fit(X_train, y_train)
-        print("   ✅ Random Forest trained")
+        print("    Random Forest trained")
 
         print("   Training Gradient Boosting...")
         self.models['gb'] = GradientBoostingRegressor(
@@ -248,7 +248,7 @@ class AdvancedHousePricePredictor:
             random_state=42
         )
         self.models['gb'].fit(X_train, y_train)
-        print("   ✅ Gradient Boosting trained")
+        print("    Gradient Boosting trained")
 
         print("   Training Neural Network...")
         self.models['nn'] = MLPRegressor(
@@ -259,9 +259,9 @@ class AdvancedHousePricePredictor:
             early_stopping=True
         )
         self.models['nn'].fit(X_train, y_train)
-        print("   ✅ Neural Network trained")
+        print("    Neural Network trained")
 
-        print("\n✅ All base models trained")
+        print("\n All base models trained")
 
     def train_ensemble_meta_learner(self, X_train, y_train, X_val, y_val):
         """
@@ -287,7 +287,7 @@ class AdvancedHousePricePredictor:
         print(f"      Gradient Boosting:  {weights[1]:.4f}")
         print(f"      Neural Network:     {weights[2]:.4f}")
 
-        print("\n✅ Ensemble meta-learner trained")
+        print("\n Ensemble meta-learner trained")
 
     def train_tax_predictor(self, X_train, y_tax_train):
         """
@@ -298,7 +298,7 @@ class AdvancedHousePricePredictor:
         print("-" * 80)
 
         if y_tax_train is None:
-            print("⚠️  No property tax data available")
+            print("  No property tax data available")
             return
 
         self.tax_model = RandomForestRegressor(
@@ -308,7 +308,7 @@ class AdvancedHousePricePredictor:
         )
         self.tax_model.fit(X_train, y_tax_train)
 
-        print("✅ Property tax predictor trained")
+        print(" Property tax predictor trained")
 
     def train_segment_models(self, X, y):
         """
@@ -318,7 +318,7 @@ class AdvancedHousePricePredictor:
         print("-" * 80)
 
         if self.market_segments is None or 'MarketSegment' not in self.df.columns:
-            print("⚠️  No market segments available")
+            print("  No market segments available")
             return
 
         segments = self.df['MarketSegment'].unique()
@@ -340,9 +340,9 @@ class AdvancedHousePricePredictor:
             model.fit(X_seg, y_seg)
             self.segment_models[seg] = model
 
-            print(f"   ✅ Segment {seg} model trained ({len(X_seg)} samples)")
+            print(f"    Segment {seg} model trained ({len(X_seg)} samples)")
 
-        print(f"\n✅ Trained {len(self.segment_models)} segment-specific models")
+        print(f"\n Trained {len(self.segment_models)} segment-specific models")
 
     def evaluate_models(self, X_test, y_test, model_type='ensemble'):
         """Comprehensive model evaluation"""
@@ -449,7 +449,7 @@ class AdvancedHousePricePredictor:
             plt.tight_layout()
             plt.savefig('milestone3_model_comparison.png', dpi=300, bbox_inches='tight')
             plt.close()
-            print("✅ Model comparison saved: milestone3_model_comparison.png")
+            print(" Model comparison saved: milestone3_model_comparison.png")
 
             if tax_results is not None and y_tax_test is not None:
                 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -474,10 +474,10 @@ class AdvancedHousePricePredictor:
                 plt.tight_layout()
                 plt.savefig('milestone3_tax_prediction.png', dpi=300, bbox_inches='tight')
                 plt.close()
-                print("✅ Tax predictions saved: milestone3_tax_prediction.png")
+                print(" Tax predictions saved: milestone3_tax_prediction.png")
 
         except Exception as e:
-            print(f"⚠️  Visualization warning: {e}")
+            print(f"  Visualization warning: {e}")
 
 def main(dataset_path=None):
     """
@@ -568,7 +568,7 @@ def main(dataset_path=None):
 
         best_model = max(results.items(), key=lambda x: x[1]['R2'])
 
-        print(f"\n📊 PERFORMANCE SUMMARY:\n")
+        print(f"\n PERFORMANCE SUMMARY:\n")
         print(f"Best Individual Model: {best_model[0]}")
         print(f"   R² Score: {best_model[1]['R2']*100:.2f}%")
 
@@ -581,17 +581,17 @@ def main(dataset_path=None):
             print(f"\nProperty Tax Prediction:")
             print(f"   R² Score: {tax_results['R2']*100:.2f}%")
 
-        print(f"\n🎯 NOVEL CONTRIBUTIONS DELIVERED:")
-        print(f"   ✅ Market Segmentation ({predictor.market_segments} segments)")
-        print(f"   ✅ Ensemble Learning (RF + GB + NN)")
-        print(f"   ✅ Dual Prediction (Price + Tax)")
+        print(f"\n NOVEL CONTRIBUTIONS DELIVERED:")
+        print(f"    Market Segmentation ({predictor.market_segments} segments)")
+        print(f"    Ensemble Learning (RF + GB + NN)")
+        print(f"    Dual Prediction (Price + Tax)")
 
-        print(f"\n📁 FILES GENERATED:")
-        print(f"   ✅ milestone3_model_comparison.png")
+        print(f"\n FILES GENERATED:")
+        print(f"    milestone3_model_comparison.png")
         if tax_results:
-            print(f"   ✅ milestone3_tax_prediction.png")
+            print(f"    milestone3_tax_prediction.png")
 
-        print(f"\n💡 KEY ACHIEVEMENT:")
+        print(f"\n KEY ACHIEVEMENT:")
         print(f"   Improved accuracy from {milestone2_rf_r2:.1f}% (Milestone II)")
         print(f"   to {results['Ensemble']['R2']*100:.1f}% (Milestone III Ensemble)")
         print(f"   = {(results['Ensemble']['R2']*100 - milestone2_rf_r2):+.1f} percentage point gain!")
@@ -604,7 +604,7 @@ def main(dataset_path=None):
         return predictor, results, tax_results
 
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print(f"\n Error: {e}")
         import traceback
         traceback.print_exc()
         return None, None, None
@@ -615,10 +615,11 @@ if __name__ == "__main__":
     predictor, results, tax_results = main()
 
     if predictor is not None:
-        print("\n✨ Milestone III implementation complete!")
+        print("\n Milestone III implementation complete!")
         print("This goes significantly beyond Milestone II by:")
         print("  • Combining multiple ML models in an ensemble")
         print("  • Adding property tax prediction")
         print("  • Implementing market segmentation")
         print("\nYou've demonstrated independent thinking and novel contributions!")
         print("="*80)
+
