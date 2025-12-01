@@ -480,10 +480,7 @@ class AdvancedHousePricePredictor:
             print(f"  Visualization warning: {e}")
 
 def main(dataset_path=None):
-    """
-    Main execution for Milestone III
-    """
-    print("\n🚀 STARTING MILESTONE III\n")
+    
 
     try:
         predictor = AdvancedHousePricePredictor()
@@ -622,4 +619,5 @@ if __name__ == "__main__":
         print("  • Implementing market segmentation")
         print("\nYou've demonstrated independent thinking and novel contributions!")
         print("="*80)
+
 
